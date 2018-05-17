@@ -149,20 +149,14 @@ else
 	Repeat everything
 
 */
-
-var debug = false
-
 func (bo *Board) Solve() error {
-	fmt.Println("--Iteration--")
+
+	// Finalize if only one solution for anything.
+	// So count the number of times something's finalized.
+	countFinalized := 0
+
 	// For each Given
 	bo.IterWhere(IsGiven, func(pos Vec2, giv *Square) bool {
-
-		//RIPOUT
-		if pos == (Vec2{0, 0}) {
-			debug = true
-		} else {
-			debug = false
-		}
 
 		// Count possible orientations. If there's only 1, finalize it.
 		countPossible := 0
@@ -175,10 +169,6 @@ func (bo *Board) Solve() error {
 			// ...each way around
 			for flip := 0; flip <= 1; flip++ {
 
-				if debug {
-					fmt.Printf("pos:%v area: %v\n", pos, area)
-				}
-
 				// For each possible placement...
 				var ofs Vec2 // Offset of top left corner to Given loc
 				for ofs[0] = 0; ofs[0] < area[0]; ofs[0]++ {
@@ -187,14 +177,6 @@ func (bo *Board) Solve() error {
 						b := a.Add(area)
 
 						contained := (a.In(ORIGIN, bo.Size()) && b.In(ORIGIN, bo.Size().Add(Vec2{1, 1})))
-
-						if debug {
-							fmt.Printf("  ofs:%v a:%v b:%v cont:%v", ofs, a, b, contained)
-							if contained {
-								fmt.Printf(" coll:%v", bo.Collides(a, b, giv))
-							}
-							fmt.Print("\n")
-						}
 
 						// ...That doesn't collide, and that fits
 						if contained && !bo.Collides(a, b, giv) {
@@ -206,9 +188,6 @@ func (bo *Board) Solve() error {
 							bo.IterIn(a, b, func(pos Vec2, potential *Square) bool {
 								if potential != giv {
 									potential.Possible = append(potential.Possible, giv)
-									if debug {
-										fmt.Printf("    pos: %v -> %v\n", pos, potential)
-									}
 								}
 								return true
 							})
@@ -217,7 +196,12 @@ func (bo *Board) Solve() error {
 				}
 
 				// Flip the factor pair, then try again.
-				area[0], area[1] = area[1], area[0]
+				// If it's a square, don't flip it.
+				if area[0] != area[1] {
+					area[0], area[1] = area[1], area[0]
+				} else {
+					break
+				}
 			}
 
 		}
@@ -226,23 +210,18 @@ func (bo *Board) Solve() error {
 		if countPossible == 1 {
 			// Finalize that solution.
 			a, b := lastPossible[0], lastPossible[1]
-			if debug {
-				fmt.Printf("Only one solution for %v@%v: %v:%v\n", giv, pos, a, b)
-			}
 			bo.IterIn(a, b, func(pos Vec2, sq *Square) bool {
-				sq.Final = giv
-				sq.Possible = sq.Possible[:0]
+				if IsNotFinal(*sq) {
+					sq.Final = giv
+					sq.Possible = sq.Possible[:0]
+					countFinalized++
+				}
 				return true
 			})
 		}
 
 		return true // keep going
 	})
-
-	// RIPOUT
-	fmt.Println()
-	fmt.Println(bo.String())
-	fmt.Println()
 
 	// For each Blank
 	remaining := 0
@@ -264,8 +243,7 @@ func (bo *Board) Solve() error {
 		return nil
 	}
 
-	// Finalize if only one solution for anything.
-	countFinalized := 0
+	// Finalize squares with 1 suggestion, add to the count.
 	bo.Iter(func(pos Vec2, sq *Square) bool {
 		if IsNotFinal(*sq) && !IsGiven(*sq) {
 			if len(sq.Possible) == 1 {
@@ -273,15 +251,20 @@ func (bo *Board) Solve() error {
 				sq.Final = sq.Possible[0]
 				countFinalized++
 			}
-			sq.Possible = sq.Possible[:0] // truncate
 		}
 		return true
 	})
 
 	if countFinalized == 0 {
 		// No squares finalized, no progress made. Abort to stop infinite loop.
-		return errors.New("Couldn't solve unambiguously.")
+		return errors.New("couldn't solve unambiguously")
 	}
+
+	// Truncate lists of Possible
+	bo.IterWhere(IsNotFinal, func(pos Vec2, sq *Square) bool {
+		sq.Possible = sq.Possible[:0]
+		return true
+	})
 
 	// Try refining it again.
 	return bo.Solve()
@@ -333,6 +316,18 @@ func (bo *Board) String() string {
 		}
 		fmt.Fprint(&buf, "\n")
 	}
+
+	return buf.String()
+}
+
+// DebugString prints each cell.
+func (bo *Board) DebugString() string {
+	var buf bytes.Buffer
+
+	bo.Iter(func(loc Vec2, sq *Square) bool {
+		fmt.Fprintf(&buf, "%v: %v\n", loc, sq)
+		return true
+	})
 
 	return buf.String()
 }

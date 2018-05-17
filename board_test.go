@@ -2,6 +2,8 @@ package shikaku
 
 import (
 	"testing"
+
+	"github.com/bradleyjkemp/cupaloy"
 )
 
 func TestBoardParseUnevenLengths(t *testing.T) {
@@ -39,14 +41,7 @@ func TestBoardParseValid(t *testing.T) {
 		t.Fatal("Failed to parse valid board")
 	}
 
-	t1 := bo.Grid[0][2].Area == 5
-	t2 := bo.Grid[2][1].Area == 2
-	t3 := IsNotFinal(bo.Grid[4][4])
-	t4 := IsNotFinal(bo.Grid[0][0])
-
-	if !(t1 && t2 && t3 && t4) {
-		t.Fatal("Didn't parse valid board correctly.")
-	}
+	cupaloy.SnapshotT(t, bo)
 
 	if t.Failed() {
 		t.Log("\n" + bo.String())
@@ -58,33 +53,13 @@ func TestDimensions(t *testing.T) {
 		-- -- 05 -- --
 		-- 04 -- -- --
 		03 02 -- -- --
-		-- -- -- 06 --
+	    -- -- -- 06 --
 	`)
 
-	if bo.Height() != 4 {
-		t.Log("Incorrect height")
-		t.Fail()
-	}
-
-	if bo.Width() != 5 {
-		t.Log("Incorrect width")
-		t.Fail()
-	}
-
-	size := bo.Size()
-
-	if size[0] != 5 {
-		t.Log("Incorrect width from Size")
-		t.Fail()
-	}
-
-	if size[1] != 4 {
-		t.Log("Incorrect height from Size")
-		t.Fail()
-	}
+	cupaloy.SnapshotT(t, bo.Height(), bo.Width(), bo.Size())
 
 	if t.Failed() {
-		t.Log("\n" + bo.String())
+		t.Log("Failed snapshot\n" + bo.String())
 	}
 }
 
@@ -171,7 +146,27 @@ func TestIter(t *testing.T) {
 }
 
 func TestSolve(t *testing.T) {
-	bo, _ := NewBoardFromString(`
+	makeTest := func(boString string) {
+		t.Run("Board", func(t *testing.T) {
+			bo, _ := NewBoardFromString(boString)
+			origStr := bo.String()
+
+			err := bo.Solve()
+			if err != nil {
+				t.Error("Couldn't find solution to solvable puzzle:", err)
+			}
+
+			cupaloy.SnapshotT(t, bo)
+
+			if t.Failed() {
+				t.Log("Original:\n" + origStr)
+				t.Log("Actual:\n" + bo.String())
+				t.Log("Debug:\n" + bo.DebugString())
+			}
+		})
+	}
+
+	makeTest(`
 		-- -- 05 -- --
 		-- 04 -- -- --
 		03 02 -- -- --
@@ -179,25 +174,11 @@ func TestSolve(t *testing.T) {
 		-- 05 -- -- --
 	`)
 
-	origStr := bo.String()
-
-	err := bo.Solve()
-	if err != nil {
-		t.Error("Couldn't find solution to solvable puzzle:", err)
-	}
-
-	// Bad excuse for a snapshot test
-	correctStr := `      0  1  2  3  4
-
- 0    5  5 05  5  5
- 1    3 04  4  4  4
- 2   03 02  6  6  6
- 3    3  2  6 06  6
- 4    5 05  5  5  5`
-
-	if t.Failed() {
-		t.Log("Original:\n" + origStr)
-		t.Log("Correct:\n" + correctStr)
-		t.Log("Actual:\n" + bo.String())
-	}
+	makeTest(`
+		03 -- -- 02 --
+		05 -- -- -- --
+		02 -- 03 -- 06
+		-- -- -- -- -- 
+		-- 04 -- -- --
+	`)
 }

@@ -16,6 +16,7 @@ type Square struct {
 	Possible []*Square
 }
 
+// NewBlank creates a blank Square
 func NewBlank() Square {
 	return Square{
 		Area:     0,
@@ -23,6 +24,7 @@ func NewBlank() Square {
 	}
 }
 
+// NewGiven creates a given Square with an area
 func NewGiven(area int) Square {
 	return Square{
 		Area:     area,
@@ -36,16 +38,11 @@ func (sq Square) String() string {
 		return fmt.Sprintf("Given(%d)", sq.Area)
 	}
 
-	return fmt.Sprintf("Blank%v", sq.Possible)
-}
-
-func (sq *Square) Finalize() {
-	if len(sq.Possible) == 1 {
-		sq.Final = sq.Possible[0]
-	} else {
-		panic("Couldn't finalize square with multiple possibilities")
+	if IsFinal(sq) {
+		return fmt.Sprintf("Final(%v)", sq.Final.Area)
 	}
-	sq.Possible = sq.Possible[:0]
+
+	return fmt.Sprintf("Blank%v", sq.Possible)
 }
 
 // IsNotFinal returns !IsFinal(sq)
