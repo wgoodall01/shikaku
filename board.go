@@ -153,11 +153,12 @@ else
 var debug = false
 
 func (bo *Board) Solve() error {
+	fmt.Println("--Iteration--")
 	// For each Given
 	bo.IterWhere(IsGiven, func(pos Vec2, giv *Square) bool {
 
 		//RIPOUT
-		if pos == (Vec2{2, 0}) {
+		if pos == (Vec2{0, 0}) {
 			debug = true
 		} else {
 			debug = false
@@ -190,13 +191,13 @@ func (bo *Board) Solve() error {
 						if debug {
 							fmt.Printf("  ofs:%v a:%v b:%v cont:%v", ofs, a, b, contained)
 							if contained {
-								fmt.Printf(" coll:%v", bo.Collides(a, b, pos))
+								fmt.Printf(" coll:%v", bo.Collides(a, b, giv))
 							}
 							fmt.Print("\n")
 						}
 
 						// ...That doesn't collide, and that fits
-						if contained && !bo.Collides(a, b, pos) {
+						if contained && !bo.Collides(a, b, giv) {
 							// incr possible count, set lastPossible
 							countPossible++
 							lastPossible = [2]Vec2{a, b}
@@ -225,7 +226,9 @@ func (bo *Board) Solve() error {
 		if countPossible == 1 {
 			// Finalize that solution.
 			a, b := lastPossible[0], lastPossible[1]
-			fmt.Printf("Only one solution for %v@%v: %v:%v\n", giv, pos, a, b)
+			if debug {
+				fmt.Printf("Only one solution for %v@%v: %v:%v\n", giv, pos, a, b)
+			}
 			bo.IterIn(a, b, func(pos Vec2, sq *Square) bool {
 				sq.Final = giv
 				sq.Possible = sq.Possible[:0]
@@ -235,6 +238,31 @@ func (bo *Board) Solve() error {
 
 		return true // keep going
 	})
+
+	// RIPOUT
+	fmt.Println()
+	fmt.Println(bo.String())
+	fmt.Println()
+
+	// For each Blank
+	remaining := 0
+	valid := bo.IterWhere(IsNotFinal, func(pos Vec2, blank *Square) bool {
+		if len(blank.Possible) == 0 {
+			return false
+		} else if len(blank.Possible) != 1 {
+			remaining++
+		}
+		return true
+	})
+
+	if !valid {
+		return errors.New("Invalid board, some squares weren't covered")
+	}
+
+	if remaining == 0 {
+		// Done. Everything's fine.
+		return nil
+	}
 
 	// Finalize if only one solution for anything.
 	countFinalized := 0
@@ -255,32 +283,12 @@ func (bo *Board) Solve() error {
 		return errors.New("Couldn't solve unambiguously.")
 	}
 
-	// For each Blank
-	remaining := 0
-	valid := bo.IterWhere(IsNotFinal, func(pos Vec2, blank *Square) bool {
-		if len(blank.Possible) == 0 {
-			return false
-		} else if len(blank.Possible) != 1 {
-			remaining++
-		}
-		return true
-	})
-
-	if !valid {
-		return errors.New("Invalid board, some squares weren't covered")
-	}
-
-	if remaining == 0 {
-		// Done. Everything's fine.
-		return nil
-	} else {
-		// Try refining it again.
-		return bo.Solve()
-	}
+	// Try refining it again.
+	return bo.Solve()
 }
 
-// String returns a string representation of the board, in the same format as NewBoardFromString.
-func (bo *Board) String() string {
+// StringGiven returns a string representation of the board, in the same format as NewBoardFromString.
+func (bo *Board) StringGiven() string {
 	var buf bytes.Buffer
 
 	for _, row := range bo.Grid {
@@ -297,6 +305,38 @@ func (bo *Board) String() string {
 	return buf.String()
 }
 
+// String returns a string representation of the board.
+func (bo *Board) String() string {
+	var buf bytes.Buffer
+
+	// write header
+	fmt.Fprint(&buf, "    ")
+	for i := 0; i < bo.Width(); i++ {
+		fmt.Fprintf(&buf, " %2d", i)
+	}
+	fmt.Fprint(&buf, "\n\n")
+
+	// Write each line
+	for i, row := range bo.Grid {
+		fmt.Fprintf(&buf, "%2d  ", i)
+		for _, sq := range row {
+			if IsGiven(sq) {
+				fmt.Fprintf(&buf, " %02d", sq.Area)
+			} else {
+				if IsFinal(sq) {
+					fmt.Fprintf(&buf, "  %1d", sq.Final.Area)
+				} else {
+					fmt.Fprintf(&buf, "   ")
+				}
+
+			}
+		}
+		fmt.Fprint(&buf, "\n")
+	}
+
+	return buf.String()
+}
+
 // Collides determines if the rectangle bounded by a (inclusively) and
 // b (exclusively) overlaps with any Concrete squares other than ignore.
 //
@@ -304,12 +344,8 @@ func (bo *Board) String() string {
 //   a[0] <= b[0]
 //   a[1] <= b[1]
 // Panics otherwise.
-func (bo *Board) Collides(a, b, ignore Vec2) bool {
+func (bo *Board) Collides(a, b Vec2, ignore *Square) bool {
 	return !bo.IterIn(a, b, func(pos Vec2, sq *Square) bool {
-		if IsGiven(*sq) && pos != ignore {
-			return false
-		}
-		return true
+		return (IsGiven(*sq) && sq == ignore) || (IsFinal(*sq) && sq.Final == ignore) || IsNotFinal(*sq)
 	})
-
 }

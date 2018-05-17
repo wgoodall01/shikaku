@@ -1,7 +1,6 @@
 package shikaku
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -99,13 +98,13 @@ func TestCollides(t *testing.T) {
 	`)
 
 	// Top left 3x3, collides.
-	if bo.Collides(Vec2{0, 0}, Vec2{3, 3}, Vec2{1, 1}) != true {
+	if bo.Collides(Vec2{0, 0}, Vec2{3, 3}, bo.Get(Vec2{1, 1})) != true {
 		t.Fail()
 		t.Log("Doesn't collide when it should")
 	}
 
 	// Bottom right 3x3, no collides.
-	if bo.Collides(Vec2{2, 2}, Vec2{5, 5}, Vec2{3, 3}) != false {
+	if bo.Collides(Vec2{2, 2}, Vec2{5, 5}, bo.Get(Vec2{3, 3})) != false {
 		t.Fail()
 		t.Log("Collides when it shouldn't")
 	}
@@ -180,32 +179,25 @@ func TestSolve(t *testing.T) {
 		-- 05 -- -- --
 	`)
 
+	origStr := bo.String()
+
 	err := bo.Solve()
-
-	all := "   0  1  2  3  4\n"
-	for i, row := range bo.Grid {
-		line := fmt.Sprintf("%d ", i)
-		for _, sq := range row {
-			if IsGiven(sq) {
-				line += fmt.Sprintf(" %02d", sq.Area)
-			} else {
-				if IsFinal(sq) {
-					line += fmt.Sprintf("  %1d", sq.Final.Area)
-				} else {
-					line += fmt.Sprintf(" .%1d", len(sq.Possible))
-					//line += " --"
-				}
-
-			}
-		}
-		all += line + "\n"
-	}
-
 	if err != nil {
 		t.Error("Couldn't find solution to solvable puzzle:", err)
 	}
 
-	t.Log("\n" + bo.String())
+	// Bad excuse for a snapshot test
+	correctStr := `      0  1  2  3  4
 
-	t.Log("\n" + all)
+ 0    5  5 05  5  5
+ 1    3 04  4  4  4
+ 2   03 02  6  6  6
+ 3    3  2  6 06  6
+ 4    5 05  5  5  5`
+
+	if t.Failed() {
+		t.Log("Original:\n" + origStr)
+		t.Log("Correct:\n" + correctStr)
+		t.Log("Actual:\n" + bo.String())
+	}
 }
