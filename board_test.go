@@ -3,7 +3,7 @@ package shikaku
 import (
 	"testing"
 
-	"github.com/bradleyjkemp/cupaloy"
+	"github.com/wgoodall01/cupaloy"
 )
 
 func TestBoardParseUnevenLengths(t *testing.T) {
@@ -180,5 +180,16 @@ func TestSolve(t *testing.T) {
 		02 -- 03 -- 06
 		-- -- -- -- -- 
 		-- 04 -- -- --
+	`)
+
+	makeTest(`
+		-- -- -- -- -- -- -- 08
+		07 -- -- -- -- -- -- --
+		-- -- -- -- -- -- 02 03
+		-- 08 -- -- -- 04 -- --
+		-- 04 -- -- -- -- 08 --
+		-- -- 03 03 -- -- -- --
+		06 -- -- -- 02 04 -- 02
+		-- -- -- -- -- -- -- --
 	`)
 }
