@@ -160,7 +160,7 @@ func (bo *Board) Solve() error {
 
 		// Count possible orientations. If there's only 1, finalize it.
 		countPossible := 0
-		lastPossible := [2]Vec2{{0, 0}, {0, 0}}
+		var lastPossible Rect
 
 		// For each factor pair...
 		factors := Factor(giv.Area)
@@ -175,19 +175,18 @@ func (bo *Board) Solve() error {
 					for ofs[1] = 0; ofs[1] < area[1]; ofs[1]++ {
 						a := pos.Sub(ofs)
 						b := a.Add(area)
-
-						contained := (a.In(ORIGIN, bo.Size()) && b.In(ORIGIN, bo.Size().Add(Vec2{1, 1})))
+						r := NewRect(bo, a, b, giv)
 
 						// ...That doesn't collide, and that fits
-						if contained && !bo.Collides(a, b, giv) {
+						if bo.Contains(r) && !bo.Collides(r) {
 							// incr possible count, set lastPossible
 							countPossible++
-							lastPossible = [2]Vec2{a, b}
+							lastPossible = r
 
 							// Add a Potential for each square in the area.
 							bo.IterIn(a, b, func(pos Vec2, potential *Square) bool {
 								if potential != giv {
-									potential.Possible = append(potential.Possible, giv)
+									potential.AddPossible(r)
 								}
 								return true
 							})
@@ -209,12 +208,19 @@ func (bo *Board) Solve() error {
 		// If there's only one solution...
 		if countPossible == 1 {
 			// Finalize that solution.
-			a, b := lastPossible[0], lastPossible[1]
-			bo.IterIn(a, b, func(pos Vec2, sq *Square) bool {
+			bo.IterIn(lastPossible.A, lastPossible.B, func(pos Vec2, sq *Square) bool {
 				if IsNotFinal(*sq) {
-					sq.Final = giv
-					sq.Possible = sq.Possible[:0]
 					countFinalized++
+				}
+				sq.Final = lastPossible
+				sq.Possible = sq.Possible[:0]
+
+				if sq.Final.Given != giv {
+					// bad things, get out
+					fmt.Println(bo.String())
+					fmt.Println(bo.DebugString())
+					fmt.Printf("%v\n", lastPossible)
+					panic("Two conflicting solutions have broken Solve()")
 				}
 				return true
 			})
@@ -247,9 +253,13 @@ func (bo *Board) Solve() error {
 	bo.Iter(func(pos Vec2, sq *Square) bool {
 		if IsNotFinal(*sq) && !IsGiven(*sq) {
 			if len(sq.Possible) == 1 {
+				sol := sq.Possible[0]
 				//Make final.
-				sq.Final = sq.Possible[0]
-				countFinalized++
+				bo.IterIn(sol.A, sol.B, func(_ Vec2, solsq *Square) bool {
+					solsq.Final = sol
+					countFinalized++
+					return true
+				})
 			}
 		}
 		return true
@@ -307,7 +317,7 @@ func (bo *Board) String() string {
 				fmt.Fprintf(&buf, " %02d", sq.Area)
 			} else {
 				if IsFinal(sq) {
-					fmt.Fprintf(&buf, "  %1d", sq.Final.Area)
+					fmt.Fprintf(&buf, "  %1d", sq.Final.Given.Area)
 				} else {
 					fmt.Fprintf(&buf, "   ")
 				}
@@ -332,15 +342,21 @@ func (bo *Board) DebugString() string {
 	return buf.String()
 }
 
-// Collides determines if the rectangle bounded by a (inclusively) and
-// b (exclusively) overlaps with any Concrete squares other than ignore.
+// Contains determines if the Rect is contained completely by the Board.
+func (bo *Board) Contains(r Rect) bool {
+	return r.A.In(ORIGIN, bo.Size()) && r.B.In(ORIGIN, bo.Size().Add(Vec2{1, 1}))
+}
+
+// Collides determines if the Rect overlaps with any final squares not of its
+// own Given.
 //
 // Preconditions:
 //   a[0] <= b[0]
 //   a[1] <= b[1]
 // Panics otherwise.
-func (bo *Board) Collides(a, b Vec2, ignore *Square) bool {
-	return !bo.IterIn(a, b, func(pos Vec2, sq *Square) bool {
-		return (IsGiven(*sq) && sq == ignore) || (IsFinal(*sq) && sq.Final == ignore) || IsNotFinal(*sq)
+func (bo *Board) Collides(r Rect) bool {
+	return !bo.IterIn(r.A, r.B, func(pos Vec2, sq *Square) bool {
+		//TODO: does sq.Final==r work here?
+		return (IsGiven(*sq) && sq == r.Given) || (IsFinal(*sq) && sq.Final == r) || IsNotFinal(*sq)
 	})
 }

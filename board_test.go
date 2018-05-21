@@ -73,13 +73,13 @@ func TestCollides(t *testing.T) {
 	`)
 
 	// Top left 3x3, collides.
-	if bo.Collides(Vec2{0, 0}, Vec2{3, 3}, bo.Get(Vec2{1, 1})) != true {
+	if bo.Collides(Rect{Vec2{0, 0}, Vec2{3, 3}, bo.Get(Vec2{1, 1})}) != true {
 		t.Fail()
 		t.Log("Doesn't collide when it should")
 	}
 
 	// Bottom right 3x3, no collides.
-	if bo.Collides(Vec2{2, 2}, Vec2{5, 5}, bo.Get(Vec2{3, 3})) != false {
+	if bo.Collides(Rect{Vec2{2, 2}, Vec2{5, 5}, bo.Get(Vec2{3, 3})}) != false {
 		t.Fail()
 		t.Log("Collides when it shouldn't")
 	}

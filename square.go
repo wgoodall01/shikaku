@@ -8,19 +8,19 @@ type Square struct {
 	// For a given square, Area != 0. For a blank, Area <= 0.
 	Area int
 
-	// Final is a blank square's parent, if it's known for certain
+	// Final is a blank square's parent rectangle, if it's known for certain
 	// If !nil, then Possible should be nil.
-	Final *Square
+	Final Rect
 
-	// For a blank square, possible values for its parent square.
-	Possible []*Square
+	// For a blank square, possible values for its parent Rects
+	Possible []Rect
 }
 
 // NewBlank creates a blank Square
 func NewBlank() Square {
 	return Square{
 		Area:     0,
-		Possible: make([]*Square, 0, 5),
+		Possible: make([]Rect, 0, 5),
 	}
 }
 
@@ -39,10 +39,25 @@ func (sq Square) String() string {
 	}
 
 	if IsFinal(sq) {
-		return fmt.Sprintf("Final(%v)", sq.Final.Area)
+		return fmt.Sprintf("Final(%v)", sq.Final)
 	}
 
 	return fmt.Sprintf("Blank%v", sq.Possible)
+}
+
+// AddPossible adds a given Rect to the list of possiblities, ignoring duplicates.
+// Returns true when a unique possibility is added.
+func (sq *Square) AddPossible(r Rect) bool {
+	// See if it's already in the list of possibles
+	for _, p := range sq.Possible {
+		if p == r {
+			return false
+		}
+	}
+
+	// Add it to the list
+	sq.Possible = append(sq.Possible, r)
+	return true
 }
 
 // IsNotFinal returns !IsFinal(sq)
@@ -52,7 +67,7 @@ func IsNotFinal(sq Square) bool {
 
 // IsFinal returns true if a square's value is known, and false if it isn't.
 func IsFinal(sq Square) bool {
-	return sq.Final != nil || IsGiven(sq)
+	return sq.Final.Given != nil || IsGiven(sq)
 }
 
 // IsAny returns true.
