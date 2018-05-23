@@ -156,7 +156,7 @@ func (bo *Board) Solve() error {
 	countFinalized := 0
 
 	// For each Given
-	bo.IterWhere(IsGiven, func(pos Vec2, giv *Square) bool {
+	bo.IterWhere(IsUnsolvedGiven, func(pos Vec2, giv *Square) bool {
 
 		// Count possible orientations. If there's only 1, finalize it.
 		countPossible := 0
@@ -175,7 +175,7 @@ func (bo *Board) Solve() error {
 					for ofs[1] = 0; ofs[1] < area[1]; ofs[1]++ {
 						a := pos.Sub(ofs)
 						b := a.Add(area)
-						r := NewRect(bo, a, b, giv)
+						r := Rect{a, b, pos}
 
 						// ...That doesn't collide, and that fits
 						if bo.Contains(r) && !bo.Collides(r) {
@@ -208,22 +208,7 @@ func (bo *Board) Solve() error {
 		// If there's only one solution...
 		if countPossible == 1 {
 			// Finalize that solution.
-			bo.IterIn(lastPossible.A, lastPossible.B, func(pos Vec2, sq *Square) bool {
-				if IsNotFinal(*sq) {
-					countFinalized++
-				}
-				sq.Final = lastPossible
-				sq.Possible = sq.Possible[:0]
-
-				if sq.Final.Given != giv {
-					// bad things, get out
-					fmt.Println(bo.String())
-					fmt.Println(bo.DebugString())
-					fmt.Printf("%v\n", lastPossible)
-					panic("Two conflicting solutions have broken Solve()")
-				}
-				return true
-			})
+			countFinalized += bo.Finalize(lastPossible)
 		}
 
 		return true // keep going
@@ -255,19 +240,38 @@ func (bo *Board) Solve() error {
 			if len(sq.Possible) == 1 {
 				sol := sq.Possible[0]
 				//Make final.
-				bo.IterIn(sol.A, sol.B, func(_ Vec2, solsq *Square) bool {
-					solsq.Final = sol
-					countFinalized++
-					return true
-				})
+				countFinalized += bo.Finalize(sol)
 			}
 		}
 		return true
 	})
 
 	if countFinalized == 0 {
-		// No squares finalized, no progress made. Abort to stop infinite loop.
-		return errors.New("couldn't solve unambiguously")
+		// Can't deterministically solve.
+		// Iterate through the potential solutions, try all of them. bfs.
+		var sol *Board = nil
+		bo.IterWhere(IsNotFinal, func(pos Vec2, sq *Square) bool {
+			for _, poss := range sq.Possible {
+				newBoard := &Board{}
+				*newBoard = *bo // Copy the board
+				newBoard.Finalize(poss)
+				err := newBoard.Solve()
+				if err == nil {
+					// Copy the solution back to this board, return without error
+					sol = newBoard
+					return false
+				}
+			}
+			return true
+		})
+
+		if sol != nil {
+			// If a solution was found, return without error
+			return nil
+		}
+
+		// Otherwise, throw error about possible solutions.
+		return errors.New("no possible solutions work")
 	}
 
 	// Truncate lists of Possible
@@ -317,7 +321,7 @@ func (bo *Board) String() string {
 				fmt.Fprintf(&buf, " %02d", sq.Area)
 			} else {
 				if IsFinal(sq) {
-					fmt.Fprintf(&buf, "  %1d", sq.Final.Given.Area)
+					fmt.Fprintf(&buf, "  %1d", bo.Get(sq.Final.Given).Area)
 				} else {
 					fmt.Fprintf(&buf, "   ")
 				}
@@ -357,6 +361,28 @@ func (bo *Board) Contains(r Rect) bool {
 func (bo *Board) Collides(r Rect) bool {
 	return !bo.IterIn(r.A, r.B, func(pos Vec2, sq *Square) bool {
 		//TODO: does sq.Final==r work here?
-		return (IsGiven(*sq) && sq == r.Given) || (IsFinal(*sq) && sq.Final == r) || IsNotFinal(*sq)
+		return (IsGiven(*sq) && pos == r.Given) || (IsFinal(*sq) && sq.Final == r) || IsNotFinal(*sq)
 	})
+}
+
+// Finalize sets all the squares within r to final, and returns the count of squares changed.
+func (bo *Board) Finalize(r Rect) (count int) {
+	countFinalized := 0
+	bo.IterIn(r.A, r.B, func(pos Vec2, sq *Square) bool {
+		if !IsFinal(*sq) {
+			countFinalized++
+		}
+
+		if !IsGiven(*sq) && IsFinal(*sq) && sq.Final != r {
+			fmt.Printf("%v\n%v\n\n%v @ %v\n", bo.String(), bo.DebugString(), pos, r)
+			panic("Can't Finalize() an invalid Rect")
+		}
+
+		sq.Final = r
+		sq.Possible = sq.Possible[:0]
+
+		return true
+	})
+
+	return countFinalized
 }

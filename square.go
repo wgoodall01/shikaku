@@ -10,6 +10,7 @@ type Square struct {
 
 	// Final is a blank square's parent rectangle, if it's known for certain
 	// If !nil, then Possible should be nil.
+	// If set to this square, a Given has been finalized.
 	Final Rect
 
 	// For a blank square, possible values for its parent Rects
@@ -67,7 +68,7 @@ func IsNotFinal(sq Square) bool {
 
 // IsFinal returns true if a square's value is known, and false if it isn't.
 func IsFinal(sq Square) bool {
-	return sq.Final.Given != nil || IsGiven(sq)
+	return sq.Final != Rect{} || IsGiven(sq)
 }
 
 // IsAny returns true.
@@ -79,4 +80,9 @@ func IsAny(sq Square) bool {
 // IsGiven returns if a square is Given
 func IsGiven(sq Square) bool {
 	return sq.Area > 0
+}
+
+// IsUnsolvedGiven returns if a square is Given and not finalized
+func IsUnsolvedGiven(sq Square) bool {
+	return IsGiven(sq) && (sq.Final == Rect{})
 }
