@@ -3,7 +3,7 @@ package shikaku
 import (
 	"testing"
 
-	"github.com/wgoodall01/cupaloy"
+	"github.com/bradleyjkemp/cupaloy"
 )
 
 func TestBoardParseUnevenLengths(t *testing.T) {
@@ -73,13 +73,13 @@ func TestCollides(t *testing.T) {
 	`)
 
 	// Top left 3x3, collides.
-	if bo.Collides(Rect{Vec2{0, 0}, Vec2{3, 3}, bo.Get(Vec2{1, 1})}) != true {
+	if bo.Collides(Rect{Vec2{0, 0}, Vec2{3, 3}, Vec2{1, 1}}) != true {
 		t.Fail()
 		t.Log("Doesn't collide when it should")
 	}
 
 	// Bottom right 3x3, no collides.
-	if bo.Collides(Rect{Vec2{2, 2}, Vec2{5, 5}, bo.Get(Vec2{3, 3})}) != false {
+	if bo.Collides(Rect{Vec2{2, 2}, Vec2{5, 5}, Vec2{3, 3}}) != false {
 		t.Fail()
 		t.Log("Collides when it shouldn't")
 	}
@@ -156,7 +156,7 @@ func TestSolve(t *testing.T) {
 				t.Error("Couldn't find solution to solvable puzzle:", err)
 			}
 
-			cupaloy.SnapshotT(t, bo)
+			cupaloy.SnapshotT(t, bo.String(), bo.DebugString())
 
 			if t.Failed() {
 				t.Log("Original:\n" + origStr)
