@@ -26,6 +26,11 @@ func (v Vec2) In(lo, hi Vec2) bool {
 	return lo[0] <= v[0] && lo[1] <= v[1] && v[0] < hi[0] && v[1] < hi[1]
 }
 
+// Transpose the vector. Flips v[0] and v[1].
+func (v Vec2) Transpose() Vec2 {
+	return Vec2{v[1], v[0]}
+}
+
 // String returns a [x,y] representation of the Vec2.
 func (v Vec2) String() string {
 	return fmt.Sprintf("[%d,%d]", v[0], v[1])

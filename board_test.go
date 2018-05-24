@@ -6,6 +6,55 @@ import (
 	"github.com/bradleyjkemp/cupaloy"
 )
 
+var testBoards = []string{
+	`-- -- 05 -- --
+	 -- 04 -- -- --
+	 03 02 -- -- --
+	 -- -- -- 06 --
+	 -- 05 -- -- --`,
+
+	`03 -- -- 02 --
+	 05 -- -- -- --
+	 02 -- 03 -- 06
+	 -- -- -- -- -- 
+	 -- 04 -- -- --`,
+
+	`-- -- -- -- -- -- -- 08
+	 07 -- -- -- -- -- -- --
+	 -- -- -- -- -- -- 02 03
+	 -- 08 -- -- -- 04 -- --
+	 -- 04 -- -- -- -- 08 --
+	 -- -- 03 03 -- -- -- --
+	 06 -- -- -- 02 04 -- 02
+	 -- -- -- -- -- -- -- --`,
+
+	`-- -- -- 04 17 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 03 -- -- 02
+	 02 -- -- 22 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	 02 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 04 -- -- --
+	 -- -- -- -- -- -- -- -- -- -- -- -- -- 24 02 -- -- -- -- -- 02 -- 04 -- -- 
+	 -- -- -- -- -- -- -- -- -- 13 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- 09 -- -- -- -- -- 21 -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- 02 -- 02 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- 20 -- -- -- -- -- -- -- -- -- -- -- 08 -- -- -- 80 -- -- -- -- -- --
+	 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 95 -- -- -- --
+	 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- -- -- 12 -- 21 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- 03 -- -- -- -- 03 -- -- -- 03 -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- -- -- -- -- -- -- 02 -- -- 03 -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- -- -- -- -- -- 03 -- 02 -- 02 -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- -- -- -- 32 -- -- -- 04 -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- -- -- -- -- -- -- 04 -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- 03 -- 06 -- -- -- -- -- 03 -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- 15 -- -- 03 -- 09 -- -- -- -- -- -- -- -- 02 -- -- -- -- -- --
+	 -- 44 -- -- -- -- -- -- 04 -- -- -- 06 -- -- -- 02 -- -- 02 -- -- -- -- --
+	 -- -- -- -- -- -- -- 26 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 03 02 -- -- -- -- --
+	 -- -- -- -- 09 -- -- -- -- -- -- -- -- 05 -- -- -- 03 -- -- -- -- -- -- --
+	 -- -- -- -- 03 -- -- 06 -- -- -- 28 -- -- -- -- -- -- -- -- -- -- -- -- --
+	 -- -- -- -- -- -- -- -- -- 09 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --`,
+}
+
 func TestBoardParseUnevenLengths(t *testing.T) {
 	_, err := NewBoardFromString(`
 		-- 02 --
@@ -29,37 +78,34 @@ func TestBoardParseNotIntegers(t *testing.T) {
 }
 
 func TestBoardParseValid(t *testing.T) {
-	bo, err := NewBoardFromString(`
-		-- -- 05 -- --
-		-- 04 -- -- --
-		03 02 -- -- --
-		-- -- -- 06 --
-		-- 05 -- -- --
-	`)
+	for _, boString := range testBoards {
+		t.Run("Board", func(t *testing.T) {
+			bo, err := NewBoardFromString(boString)
 
-	if err != nil {
-		t.Fatal("Failed to parse valid board")
-	}
+			if err != nil {
+				t.Fatal("Failed to parse valid board")
+			}
 
-	cupaloy.SnapshotT(t, bo)
+			cupaloy.SnapshotT(t, bo)
 
-	if t.Failed() {
-		t.Log("\n" + bo.String())
+			if t.Failed() {
+				t.Log("\n" + bo.String())
+			}
+		})
 	}
 }
 
 func TestDimensions(t *testing.T) {
-	bo, _ := NewBoardFromString(`
-		-- -- 05 -- --
-		-- 04 -- -- --
-		03 02 -- -- --
-	    -- -- -- 06 --
-	`)
+	for _, boString := range testBoards {
+		t.Run("Board", func(t *testing.T) {
+			bo, _ := NewBoardFromString(boString)
+			cupaloy.SnapshotT(t, bo.Height(), bo.Width(), bo.Size())
 
-	cupaloy.SnapshotT(t, bo.Height(), bo.Width(), bo.Size())
+			if t.Failed() {
+				t.Log("Failed snapshot\n" + bo.String())
+			}
+		})
 
-	if t.Failed() {
-		t.Log("Failed snapshot\n" + bo.String())
 	}
 }
 
@@ -146,7 +192,7 @@ func TestIter(t *testing.T) {
 }
 
 func TestSolve(t *testing.T) {
-	makeTest := func(boString string) {
+	for _, boString := range testBoards {
 		t.Run("Board", func(t *testing.T) {
 			bo, _ := NewBoardFromString(boString)
 			origStr := bo.String()
@@ -165,31 +211,18 @@ func TestSolve(t *testing.T) {
 			}
 		})
 	}
+}
 
-	makeTest(`
-		-- -- 05 -- --
-		-- 04 -- -- --
-		03 02 -- -- --
-		-- -- -- 06 --
-		-- 05 -- -- --
-	`)
-
-	makeTest(`
-		03 -- -- 02 --
-		05 -- -- -- --
-		02 -- 03 -- 06
-		-- -- -- -- -- 
-		-- 04 -- -- --
-	`)
-
-	makeTest(`
-		-- -- -- -- -- -- -- 08
-		07 -- -- -- -- -- -- --
-		-- -- -- -- -- -- 02 03
-		-- 08 -- -- -- 04 -- --
-		-- 04 -- -- -- -- 08 --
-		-- -- 03 03 -- -- -- --
-		06 -- -- -- 02 04 -- 02
-		-- -- -- -- -- -- -- --
-	`)
+func BenchmarkSolve(b *testing.B) {
+	for _, boString := range testBoards {
+		b.Run("Board", func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				bo, _ := NewBoardFromString(boString)
+				err := bo.Solve()
+				if err != nil {
+					b.Fatalf("Solve failed, see TestSolve for details")
+				}
+			}
+		})
+	}
 }

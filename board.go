@@ -197,7 +197,7 @@ func (bo *Board) Solve() error {
 				// Flip the factor pair, then try again.
 				// If it's a square, don't flip it.
 				if area[0] != area[1] {
-					area[0], area[1] = area[1], area[0]
+					area = area.Transpose()
 				} else {
 					break
 				}
@@ -360,7 +360,6 @@ func (bo *Board) Contains(r Rect) bool {
 // Panics otherwise.
 func (bo *Board) Collides(r Rect) bool {
 	return !bo.IterIn(r.A, r.B, func(pos Vec2, sq *Square) bool {
-		//TODO: does sq.Final==r work here?
 		return (IsGiven(*sq) && pos == r.Given) || (IsFinal(*sq) && sq.Final == r) || IsNotFinal(*sq)
 	})
 }
@@ -374,7 +373,6 @@ func (bo *Board) Finalize(r Rect) (count int) {
 		}
 
 		if !IsGiven(*sq) && IsFinal(*sq) && sq.Final != r {
-			fmt.Printf("%v\n%v\n\n%v @ %v\n", bo.String(), bo.DebugString(), pos, r)
 			panic("Can't Finalize() an invalid Rect")
 		}
 

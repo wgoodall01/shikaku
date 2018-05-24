@@ -25,6 +25,11 @@ func TestMath(t *testing.T) {
 		t.Fail()
 		t.Log("Can't subtract properly")
 	}
+
+	if (Vec2{0, 1}).Transpose() != (Vec2{1, 0}) {
+		t.Fail()
+		t.Log("Can't transpose properly")
+	}
 }
 
 func TestFactor(t *testing.T) {
