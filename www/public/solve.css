@@ -1,0 +1,18 @@
+.solve_table td {
+  height: 32px;
+  width: 32px;
+}
+
+.solve_table {
+  border-spacing: 8px;
+}
+
+.solve_label {
+  color: var(--color-mid);
+  text-align: center;
+}
+
+.solve_rect {
+  text-align: center;
+  background-color: var(--color-light);
+}

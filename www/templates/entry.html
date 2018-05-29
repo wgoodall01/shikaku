@@ -1,0 +1,26 @@
+{{ define "head" }}
+<link rel="stylesheet" href="/public/entry.css"/>
+{{ end }}
+
+{{ define "body" }}
+<h2>Enter a shikaku puzzle:</h2>
+<form action="/solve" method="POST">
+	<div class="entry_dimension-input">
+		<input type="number" name="rows" value="8" min="0"/>rows
+		<span class="entry_by">&times;</span>
+		<input type="number" name="cols" value="8" min="0"/> columns.
+	</div>
+	
+	<table class="entry_table" id="entry_table">
+		<tbody>
+			<tr>
+				<td><span class="entry_loading-placeholder">Loading...</span></td>
+			</tr>
+		<tbody>
+	</table>
+
+	<script src="/public/entry.js"></script>
+
+	<input type="submit" value="Solve" class="entry_solve"/>
+</form>
+{{ end }}

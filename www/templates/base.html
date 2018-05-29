@@ -1,0 +1,21 @@
+<head>
+	<title>{{ block "title" . }}Shikaku Solver{{ end }}</title>
+	<link rel="stylesheet" href="/public/main.css"/>
+	{{ template "head" . }}
+	<link href="https://fonts.googleapis.com/css?family=Bitter" rel="stylesheet">
+</head>
+<body>
+	<div class="base_header">
+		<div class="base_container">
+			<h1>Shikaku Solver</h1>
+			<ul>
+				<li><a href="/">Solve</a></li>
+				<li><a href="/about">About</a></li>
+				<li><a href="https://github.com/wgoodall01/shikaku">GitHub</a></li>
+			</ul>
+		</div>
+	</div>
+	<section class="base_body base_container">
+		{{ template "body" . }}
+	</section>
+</body>

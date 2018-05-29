@@ -41,7 +41,7 @@ func (bo *Board) Get(pos Vec2) *Square {
 
 // BoardVisitor is a function called for a certain set of squares in a
 // board, returning true to advance or false to stop iterating.
-type BoardVisitor = func(pos Vec2, sq *Square) (advance bool)
+type BoardVisitor func(pos Vec2, sq *Square) (advance bool)
 
 // Iter calls visitor for each square in the board.
 func (bo *Board) Iter(visitor BoardVisitor) bool {
@@ -73,8 +73,8 @@ func (bo *Board) IterIn(a, b Vec2, visitor BoardVisitor) (uninterrupted bool) {
 	}
 
 	var pos Vec2
-	for pos[0] = a[0]; pos[0] < b[0]; pos[0]++ {
-		for pos[1] = a[1]; pos[1] < b[1]; pos[1]++ {
+	for pos[1] = a[1]; pos[1] < b[1]; pos[1]++ {
+		for pos[0] = a[0]; pos[0] < b[0]; pos[0]++ {
 			sq := bo.Get(pos)
 			advance := visitor(pos, sq)
 			if !advance {

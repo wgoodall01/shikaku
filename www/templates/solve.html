@@ -1,0 +1,17 @@
+{{ define "title" }}Shikaku Solution{{ end }}
+{{ define "head" }}
+<link rel="stylesheet" href="/public/solve.css"/>
+{{ end }}
+{{ define "body" }}
+{{ if .Err }}
+<h2>Something went wrong...</h2>
+<p>{{.Err}}</p>
+<a href="#" onclick="window.history.back()">&lt; Back</a>
+
+{{ else }}
+<h2>Solution</h2>
+<table class="solve_table">
+	{{ .Soln }}
+</table>
+{{ end }}
+{{ end }}
