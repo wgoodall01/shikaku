@@ -3,8 +3,16 @@
   width: 32px;
 }
 
+.solve_shrink .solve_table td {
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+  padding: 0;
+  font-size: 12px;
+}
+
 .solve_table {
-  border-spacing: 8px;
+  border-spacing: 4px;
 }
 
 .solve_label {

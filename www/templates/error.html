@@ -7,12 +7,16 @@
 	<div class="err_main">
 	<section class="base_container">
 		<div class="err_bang">!</div>
-		<h1 class="err_err">{{.Status}}: {{.Message}}</h1>
-		{{ range $i, $msg := .More }}
-			<p>{{ $msg }}</p>
+		{{ if .Message }}
+		<h1>{{ .Message }}</h1>
+		<p>{{ .Status }}: {{ statusText .Status}}
+		{{ else }}
+		<h1>{{ .Status }}: {{ statusText .Status }}</h1>
 		{{ end }}
-		<a class="err_back" href="#" onclick="window.history.back()">&lt; Back</a>
-		<a class="err_home" href="/">Home</a>
+		<div>
+			<a class="err_back" href="#" onclick="window.history.back()">&lt; Back</a>
+			<a class="err_home" href="/">Home</a>
+		</div>
 	</section>
 	</div>
 </body>

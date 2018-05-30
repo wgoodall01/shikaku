@@ -10,8 +10,11 @@
 
 {{ else }}
 <h2>Solution</h2>
-<table class="solve_table">
-	{{ .Soln }}
-</table>
+<p>Computed in {{ printf "%.2f" .Duration }} ms.</p>
+<div class="{{ if .Small }}solve_shrink{{end}} solve_wrapper">
+	<table class="solve_table">
+		{{ .Soln }}
+	</table>
+</div>
 {{ end }}
 {{ end }}

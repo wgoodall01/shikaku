@@ -3,6 +3,10 @@
 const tableEl = document.querySelector('#entry_table>tbody');
 const rowsInput = document.querySelector(`input[name="rows"]`);
 const colsInput = document.querySelector(`input[name="cols"]`);
+const shrinkable = document.querySelector('#entry_shrinkable');
+
+const max = 40;
+const shrinkAt = 15;
 
 const mkInputEl = () => {
   let td = document.createElement('td');
@@ -15,8 +19,24 @@ const mkInputEl = () => {
 };
 
 function update() {
-  const numRows = parseInt(rowsInput.value);
-  const numCols = parseInt(colsInput.value);
+  let numRows = parseInt(rowsInput.value);
+  let numCols = parseInt(colsInput.value);
+
+  if (numRows > 40) {
+    numRows = max;
+    rowsInput.value = max;
+  }
+
+  if (numCols > max) {
+    numCols = max;
+    colsInput.value = max;
+  }
+
+  if (numCols > shrinkAt || numRows > shrinkAt) {
+    shrinkable.classList.add('entry_shrink');
+  } else {
+    shrinkable.classList.remove('entry_shrink');
+  }
 
   console.log(`update ${numRows} x ${numCols}`);
 
@@ -52,4 +72,6 @@ rowsInput.oninput = () => update();
 colsInput.oninput = () => update();
 
 tableEl.querySelector('tr').remove();
-update();
+
+document.addEventListener('DOMContentLoaded', () => update());
+//update();

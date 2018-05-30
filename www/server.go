@@ -16,22 +16,19 @@ import (
 type HttpError struct {
 	Status  int
 	Message string
-	More    []string
 }
 
 func ErrStatus(status int) HttpError {
 	return HttpError{
 		Status:  status,
-		Message: http.StatusText(status),
-		More:    []string{},
+		Message: "",
 	}
 }
 
 func ErrMsg(status int, msg string) HttpError {
 	return HttpError{
 		Status:  status,
-		Message: http.StatusText(status),
-		More:    []string{msg},
+		Message: msg,
 	}
 }
 
@@ -65,7 +62,12 @@ func (sw *statusWriter) Write(buf []byte) (int, error) {
 }
 
 func WrapMux(h http.Handler) http.Handler {
-	errorTmpl := template.Must(template.ParseFiles("templates/error.html"))
+	errFuncs := map[string]interface{}{
+		"statusText": func(status int) string {
+			return http.StatusText(status)
+		},
+	}
+	errorTmpl := template.Must(template.New("error.html").Funcs(errFuncs).ParseFiles("templates/error.html"))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sw := &statusWriter{
@@ -173,6 +175,10 @@ func Solve() http.HandlerFunc {
 			cols, err := strconv.Atoi(r.Form["cols"][0])
 			MustErr(err, ErrMsg(400, "Invalid num. cols"))
 
+			if cols > 40 || rows > 40 {
+				panic(ErrMsg(400, fmt.Sprintf("%d by %d board is way too large.", rows, cols)))
+			}
+
 			// Allocate board
 			bo := &shikaku.Board{}
 			for r := 0; r < rows; r++ {
@@ -186,13 +192,20 @@ func Solve() http.HandlerFunc {
 					bo.Grid[r][c] = shikaku.NewBlank()
 				} else {
 					val, err := strconv.Atoi(valStr)
-					MustErr(err, ErrMsg(400, fmt.Sprintf("Bad cell at [%d,%d]", c, r)))
+					MustErr(err, ErrMsg(400, fmt.Sprintf("Bad square at [%d,%d]", c, r)))
+
+					if val > rows*cols {
+						panic(ErrMsg(400, fmt.Sprintf("Square [%d,%d] is too large", c, r)))
+					}
+
 					bo.Grid[r][c] = shikaku.NewGiven(val)
 				}
 			}
 
 			// Solve the puzzle
+			tStart := time.Now()
 			solveErr := bo.Solve()
+			duration := time.Since(tStart).Seconds() / 1000 // in ms
 
 			// Build the table.
 			buf := bytes.Buffer{}
@@ -231,11 +244,15 @@ func Solve() http.HandlerFunc {
 			fmt.Fprintf(&buf, "</tbody>")
 
 			viewState := struct {
-				Err  error
-				Soln template.HTML
+				Err      error
+				Soln     template.HTML
+				Small    bool
+				Duration float64
 			}{
-				Err:  solveErr,
-				Soln: template.HTML(buf.String()),
+				Err:      solveErr,
+				Soln:     template.HTML(buf.String()),
+				Small:    rows > 15 || cols > 15,
+				Duration: duration,
 			}
 
 			Must(tmpl.Execute(w, viewState))

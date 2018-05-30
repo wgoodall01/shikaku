@@ -1,61 +1,74 @@
-.entry_dimension-input{
-	color:var(--color-mid);
+.entry_dimension-input {
+  color: var(--color-mid);
 }
 
-.entry_dimension-input input{
-	width:64px;
-	font-size:inherit;
-	border:none;
-	margin:0 4px;
-	padding:4px;
-	color:black;
-	background-color:var(--color-light);
-	border-bottom:var(--color-mid);
+.entry_dimension-input input {
+  width: 64px;
+  font-size: inherit;
+  border: none;
+  margin: 0 4px;
+  padding: 4px;
+  color: black;
+  background-color: var(--color-light);
+  border-bottom: var(--color-mid);
 }
 
 .entry_dimension-input .entry_by {
-	color:black;
-	margin:0 4px;
+  color: black;
+  margin: 0 4px;
 }
 
 .entry_loading-placeholder {
-	display:inline-block;
-	background-color:var(--color-light);
-	color:var(--color-mid);
-	margin:64px auto;
-	padding:64px;
+  display: inline-block;
+  background-color: var(--color-light);
+  color: var(--color-mid);
+  margin: 64px auto;
+  padding: 64px;
 }
 
-.entry_table{
-	margin-top:16px;
-	border:none;
+.entry_table_scroll {
+  overflow-x: scroll;
 }
 
-.entry_table input{
-	width:32px;
-	height:32px;
-	padding:4px;
-	margin:4px;
-	border:none;
-	appearance:none;
-	font-weight:bold;
-	text-align:center;
-	font-size:inherit;
-	background-color:var(--color-light);
+.entry_table {
+  margin-top: 16px;
+  border: none;
+  border-spacing: 0;
 }
 
-.entry_table tr td:first-child input{
-	margin-left:0;
+.entry_table input {
+  width: 32px;
+  height: 32px;
+  margin: 2px;
+  padding: 0;
+  border: none;
+  appearance: none;
+  font-weight: bold;
+  text-align: center;
+  font-size: inherit;
+  background-color: var(--color-light);
 }
 
-.entry_solve{
-	display:inline-block;
-	margin-top:32px;
-	width:128px;
-	height:32px;
-	border:none;
-	background-color:var(--color-primary);
-	color:white;
-	font-size:inherit;
-	cursor:pointer;
+.entry_shrink .entry_table input {
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  margin: 1px;
+  padding: 0;
+}
+
+.entry_table tr td:first-child input {
+  margin-left: 0;
+}
+
+.entry_solve {
+  display: inline-block;
+  margin-top: 32px;
+  width: 128px;
+  height: 32px;
+  border: none;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: inherit;
+  cursor: pointer;
 }
