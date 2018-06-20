@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/NYTimes/gziphandler"
 	"github.com/wgoodall01/shikaku"
 	"html/template"
 	"log"
@@ -69,7 +70,7 @@ func WrapMux(h http.Handler) http.Handler {
 	}
 	errorTmpl := template.Must(template.New("error.html").Funcs(errFuncs).ParseFiles("templates/error.html"))
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return gziphandler.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sw := &statusWriter{
 			ResponseWriter: w,
 		}
@@ -118,7 +119,7 @@ func WrapMux(h http.Handler) http.Handler {
 		}(time.Now())
 
 		h.ServeHTTP(sw, r)
-	})
+	}))
 }
 
 func LoadTemplateFuncs(name string, funcs template.FuncMap) *template.Template {

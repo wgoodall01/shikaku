@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/NYTimes/gziphandler"
+  packages = ["."]
+  revision = "2600fb119af974220d3916a5916d6e31176aac1b"
+  version = "v1.0.1"
+
+[[projects]]
   name = "github.com/bradleyjkemp/cupaloy"
   packages = ["."]
   revision = "6beff3cebcaae538bba80223de5cfbefd2baf035"
@@ -22,6 +28,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "23a8fec6f00b6089f6f96a146c24c630fc34f63e307d4f6324b7e4180790a44d"
+  inputs-digest = "d7346ff188541a4c14195647618dd198bcdec474f8fbaeefc26cfa6a0c356df7"
   solver-name = "gps-cdcl"
   solver-version = 1

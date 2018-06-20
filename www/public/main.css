@@ -27,7 +27,8 @@ body {
 }
 
 .base_container {
-  width: 800px;
+  max-width: 800px;
+  padding: 0 10px;
   margin: 0 auto;
 }
 
