@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/NYTimes/gziphandler"
-	"github.com/wgoodall01/shikaku"
 	"html/template"
 	"log"
 	"net/http"
@@ -12,6 +10,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/NYTimes/gziphandler"
+	"github.com/wgoodall01/shikaku"
 )
 
 type HttpError struct {
@@ -145,7 +146,6 @@ func Entry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			panic(ErrStatus(404))
-			return
 		}
 
 		switch r.Method {
