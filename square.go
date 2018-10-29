@@ -35,15 +35,20 @@ func NewGiven(area int) Square {
 
 // String returns a string representation of a Given
 func (sq Square) String() string {
+	str := ""
 	if IsGiven(sq) {
-		return fmt.Sprintf("Given(%d)", sq.Area)
+		str += fmt.Sprintf("Given(%d) ", sq.Area)
 	}
 
 	if IsFinal(sq) {
-		return fmt.Sprintf("Final(%v)", sq.Final)
+		str += fmt.Sprintf("Final(%v) ", sq.Final)
 	}
 
-	return fmt.Sprintf("Blank%v", sq.Possible)
+	if len(sq.Possible) > 0 {
+		str += fmt.Sprintf("Blank%v ", sq.Possible)
+	}
+
+	return str[:len(str)-1]
 }
 
 // AddPossible adds a given Rect to the list of possiblities, ignoring duplicates.

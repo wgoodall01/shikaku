@@ -11,7 +11,7 @@ type Rect struct {
 }
 
 func (r Rect) String() string {
-	return fmt.Sprintf("%v:%v-%v", r.Given, r.A, r.B)
+	return fmt.Sprintf("%v-%v@%v", r.A, r.B, r.Given)
 }
 
 func (r Rect) Size() Vec2 {
