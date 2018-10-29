@@ -150,7 +150,6 @@ else
 
 */
 func (bo *Board) Solve() error {
-
 	// Finalize if only one solution for anything.
 	// So count the number of times something's finalized.
 	countFinalized := 0
@@ -218,9 +217,9 @@ func (bo *Board) Solve() error {
 	remaining := 0
 	valid := bo.IterWhere(IsNotFinal, func(pos Vec2, blank *Square) bool {
 		if len(blank.Possible) == 0 {
-			return false
-		} else if len(blank.Possible) != 1 {
-			remaining++
+			return false // board is invalid, can't cover a square
+		} else if len(blank.Possible) != 0 {
+			remaining++ // one more remaining square to determine
 		}
 		return true
 	})
@@ -378,7 +377,6 @@ func (bo *Board) Finalize(r Rect) (count int) {
 
 		sq.Final = r
 		sq.Possible = sq.Possible[:0]
-
 		return true
 	})
 
