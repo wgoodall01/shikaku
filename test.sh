@@ -5,6 +5,8 @@
 set -e
 echo "" > coverage.txt
 
+export GO111MODULE=on
+
 for d in $(go list ./... | grep -v vendor); do
 	# Run tests with coverage
     go test -v -race -coverprofile=profile.out -covermode=atomic $d

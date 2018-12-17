@@ -1,9 +1,0 @@
-
-[[constraint]]
-  name = "github.com/bradleyjkemp/cupaloy"
-  version = "2.2.0"
-
-[metadata.heroku]
-  root-package = "github.com/wgoodall01/shikaku"
-  install = [ "./www" ]
-  ensure = "true"
