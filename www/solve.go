@@ -35,6 +35,11 @@ func (h *solveHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Form["rows"] == nil || r.Form["cols"] == nil {
+		WriteError(w, 400, "Invalid request", nil)
+		return
+	}
+
 	rows, err := strconv.Atoi(r.Form["rows"][0])
 	if err != nil {
 		WriteError(w, 400, "Invalid number of rows", err)

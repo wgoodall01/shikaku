@@ -29,6 +29,7 @@ func WriteError(w http.ResponseWriter, status int, msg string, err error) {
 		}
 	})
 
+	w.WriteHeader(status)
 	tmplErr := tmpl.Execute(w, HttpError{Status: status, Message: msg})
 	if tmplErr != nil {
 		panic(tmplErr)
