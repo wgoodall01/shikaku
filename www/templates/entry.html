@@ -6,9 +6,9 @@
 <h2>Enter a shikaku puzzle:</h2>
 <form action="/solve" method="POST">
 	<div class="entry_dimension-input">
-		<input type="number" name="rows" value="8" min="0"/>rows
+		<input type="number" name="rows" value="8" min="0" data-hj-whitelist/>rows
 		<span class="entry_by">&times;</span>
-		<input type="number" name="cols" value="8" min="0"/> columns.
+		<input type="number" name="cols" value="8" min="0" data-hj-whitelist/> columns.
 	</div>
 	<div id="entry_shrinkable" class="entry_table_scroll">
 		<table class="entry_table" id="entry_table">

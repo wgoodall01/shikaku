@@ -1,19 +1,20 @@
-'use strict';
+"use strict";
 
-const tableEl = document.querySelector('#entry_table>tbody');
+const tableEl = document.querySelector("#entry_table>tbody");
 const rowsInput = document.querySelector(`input[name="rows"]`);
 const colsInput = document.querySelector(`input[name="cols"]`);
-const shrinkable = document.querySelector('#entry_shrinkable');
+const shrinkable = document.querySelector("#entry_shrinkable");
 
 const max = 40;
 const shrinkAt = 15;
 
 const mkInputEl = () => {
-  let td = document.createElement('td');
-  let el = document.createElement('input');
-  el.type = 'text';
-  el.pattern = '[0-9]+';
-  el.name = 'e';
+  let td = document.createElement("td");
+  let el = document.createElement("input");
+  el.type = "text";
+  el.pattern = "[0-9]+";
+  el.dataset.hjWhitelist = "true";
+  el.name = "e";
   td.appendChild(el);
   return td;
 };
@@ -33,18 +34,18 @@ function update() {
   }
 
   if (numCols > shrinkAt || numRows > shrinkAt) {
-    shrinkable.classList.add('entry_shrink');
+    shrinkable.classList.add("entry_shrink");
   } else {
-    shrinkable.classList.remove('entry_shrink');
+    shrinkable.classList.remove("entry_shrink");
   }
 
   console.log(`update ${numRows} x ${numCols}`);
 
-  let rows = tableEl.querySelectorAll('tr');
+  let rows = tableEl.querySelectorAll("tr");
   if (rows.length < numRows) {
     // Add rows to fill
     for (let i = 0; i < numRows - rows.length; i++) {
-      tableEl.appendChild(document.createElement('tr'));
+      tableEl.appendChild(document.createElement("tr"));
     }
   } else if (rows.length >= numRows) {
     // Remove rows to trim
@@ -53,9 +54,9 @@ function update() {
     }
   }
 
-  rows = tableEl.querySelectorAll('tr'); // refresh from DOM
+  rows = tableEl.querySelectorAll("tr"); // refresh from DOM
   for (let row of rows) {
-    const cols = row.querySelectorAll('td');
+    const cols = row.querySelectorAll("td");
     if (cols.length < numCols) {
       for (let i = 0; i < numCols - cols.length; i++) {
         row.appendChild(mkInputEl());
@@ -71,7 +72,7 @@ function update() {
 rowsInput.oninput = () => update();
 colsInput.oninput = () => update();
 
-tableEl.querySelector('tr').remove();
+tableEl.querySelector("tr").remove();
 
-document.addEventListener('DOMContentLoaded', () => update());
+document.addEventListener("DOMContentLoaded", () => update());
 //update();
