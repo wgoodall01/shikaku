@@ -70,6 +70,26 @@ var testBoards = []string{
 	 -- 03 -- -- 04 -- 05
 	 -- -- -- -- -- 04 --
 	 -- -- 03 -- -- -- --`,
+
+	`12 -- -- -- -- -- -- --
+	 -- -- -- -- -- 04 -- --
+	 -- -- -- -- 06 -- -- --
+	 -- -- 08 -- -- -- 08 --
+	 -- -- -- -- -- -- -- 03
+	 -- 09 -- 01 -- 04 -- --
+	 -- -- -- 04 -- -- -- --
+	 -- -- -- -- 03 -- -- 02`,
+}
+
+var testBadBoards = []string{
+	`12 01 -- -- -- -- -- --
+	 -- -- -- -- -- 04 -- --
+	 -- -- -- -- 06 -- -- --
+	 -- -- 08 -- -- -- 08 --
+	 -- -- -- -- -- -- -- 03
+	 -- 09 -- 01 -- 04 -- --
+	 -- -- -- 04 -- -- -- --
+	 -- -- -- -- 03 -- -- 02`,
 }
 
 func TestBoardParseUnevenLengths(t *testing.T) {
@@ -220,6 +240,29 @@ func TestSolve(t *testing.T) {
 			}
 
 			cupaloy.SnapshotT(t, bo.String(), bo.DebugString())
+
+			if t.Failed() {
+				t.Log("Original:\n" + origStr)
+				t.Log("Actual:\n" + bo.String())
+				t.Log("Debug:\n" + bo.DebugString())
+			}
+		})
+	}
+}
+
+func TestBadSolve(t *testing.T) {
+	for _, boString := range testBadBoards {
+		t.Run("Board", func(t *testing.T) {
+			bo, _ := NewBoardFromString(boString)
+			origStr := bo.String()
+
+			err := bo.Solve()
+			t.Log("Error:", err)
+			if err == nil {
+				t.Error("Should have failed while solving bad puzzle")
+			}
+
+			cupaloy.SnapshotT(t, err, bo.String(), bo.DebugString())
 
 			if t.Failed() {
 				t.Log("Original:\n" + origStr)

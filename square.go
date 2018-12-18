@@ -48,7 +48,11 @@ func (sq Square) String() string {
 		str += fmt.Sprintf("Blank%v ", sq.Possible)
 	}
 
-	return str[:len(str)-1]
+	if str == "" {
+		return "?"
+	} else {
+		return str[:len(str)-1]
+	}
 }
 
 // AddPossible adds a given Rect to the list of possiblities, ignoring duplicates.

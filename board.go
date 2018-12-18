@@ -150,6 +150,19 @@ else
 
 */
 func (bo *Board) Solve() error {
+	// Sanity check: all the squares, added together, actually cover the board
+	totalCovered := 0
+	bo.Iter(func(pos Vec2, sq *Square) bool {
+		totalCovered += sq.Area
+		return true
+	})
+	if totalCovered > bo.Height()*bo.Width() {
+		return errors.New("Covered area is greater than board area")
+	}
+	if totalCovered < bo.Height()*bo.Width() {
+		return errors.New("Covered area is less than board area")
+	}
+
 	// Finalize if only one solution for anything.
 	// So count the number of times something's finalized.
 	countFinalized := 0
