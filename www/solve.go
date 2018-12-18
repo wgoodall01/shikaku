@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	raven "github.com/getsentry/raven-go"
 	"github.com/wgoodall01/shikaku"
 )
 
@@ -30,6 +31,7 @@ func Solve() http.Handler {
 }
 
 func (h *solveHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
 	if err := r.ParseForm(); err != nil {
 		WriteError(w, 400, "Couldn't parse form", err)
 		return
@@ -62,6 +64,21 @@ func (h *solveHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for r := 0; r < rows; r++ {
 		bo.Grid = append(bo.Grid, make([]shikaku.Square, cols))
 	}
+
+	// Error handling: send bad boards to Sentry with panics
+	defer func(bo *shikaku.Board) {
+		if thrown := recover(); thrown != nil {
+			err, ok := thrown.(error)
+			if !ok {
+				panic(err)
+			}
+			raven.CaptureErrorAndWait(err, map[string]string{
+				"board": bo.DebugString(),
+			})
+			WriteError(w, 500, "Internal solve error", err)
+			return
+		}
+	}(bo)
 
 	for i, valStr := range r.Form["e"] {
 		r := int(i / cols)
