@@ -4,11 +4,11 @@
 [![Codecov](https://img.shields.io/codecov/c/github/wgoodall01/shikaku.svg?style=flat-square)](https://codecov.io/gh/wgoodall01/shikaku)
 [![Code Climate](https://img.shields.io/codeclimate/github/wgoodall01/shikaku.svg?style=flat-square)](https://codeclimate.com/github/wgoodall01/shikaku)
 
-Solves games of [Shikaku](https://www.wikiwand.com/en/Shikaku).
+Solves games of [Shikaku](https://www.wikiwand.com/en/Shikaku). This problem has been proven NP-complete.
 
 ## What it is
 
-Shiaku is a puzzle game, similar to Sudoku. You start with a board which looks like this:
+Shikaku is a puzzle game, similar to Sudoku. You start with a board which looks like this:
 
 ```
 -- -- -- -- -- -- -- 08
